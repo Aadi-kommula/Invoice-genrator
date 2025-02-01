@@ -1,7 +1,10 @@
+// src/App.jsx
 import React, { useState } from "react";
 import html2pdf from "html2pdf.js";
 
 const App = () => {
+  const [password, setPassword] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
@@ -20,9 +23,17 @@ const App = () => {
     instagram: "https://www.instagram.com/express_gifts/",
     email: "expressgifts.contact@gmail.com",
     storeLink: "https://tinyurl.com/Express-Gifts-Store",
-    logo: "/logo.png",
+    logo: "/logo.png", // Business logo
   };
 
+  // Generate a dynamic invoice number
+  const generateInvoiceNumber = () => {
+    const prefix = customerName.slice(0, 3).toUpperCase();
+    const randomDigits = Math.floor(1000 + Math.random() * 9000); // Random 4-digit number
+    return `${prefix}${randomDigits}`;
+  };
+
+  // Validate form fields
   const validateForm = () => {
     const newErrors = {};
     if (!customerName) newErrors.customerName = "Customer Name is required";
@@ -36,6 +47,7 @@ const App = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Generate PDF
   const generatePDF = () => {
     if (!validateForm()) {
       alert("Please fill all the fields before generating the invoice.");
@@ -53,7 +65,46 @@ const App = () => {
     html2pdf().set(opt).from(element).save();
   };
 
+  // Handle password submission
+  const handlePasswordSubmit = () => {
+    if (password === "4455") {
+      setIsAuthenticated(true);
+    } else {
+      alert("Incorrect password. Please try again.");
+    }
+  };
+
   const totalAmount = productPrice * productQuantity;
+
+  if (!isAuthenticated) {
+    return (
+      <div className="container mt-5">
+        <h1 className="text-center mb-4">Invoice Generator</h1>
+        <div className="row justify-content-center">
+          <div className="col-md-4">
+            <div className="card">
+              <div className="card-body">
+                <h5 className="card-title">Enter Password</h5>
+                <input
+                  type="password"
+                  className="form-control mb-3"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  className="btn btn-primary w-100"
+                  onClick={handlePasswordSubmit}
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mt-5">
@@ -176,14 +227,13 @@ const App = () => {
 
         <div className="col-md-6">
           <div id="invoice" className="p-4 border">
-            <img
-              src={businessDetails.logo}
-              alt="Business Logo"
-              style={{ width: "100px", height: "auto" }}
-            />
             {/* Header */}
             <div className="mb-4">
-
+              <img
+                src={businessDetails.logo}
+                alt="Business Logo"
+                style={{ width: "100px", height: "auto" }}
+              />
               <h2>{businessDetails.name}</h2>
               <p className="mb-1">
                 <strong>Business Number:</strong> {businessDetails.businessNumber}
@@ -219,7 +269,7 @@ const App = () => {
               <div>
                 <h4>Invoice Details</h4>
                 <p>
-                  <strong>Invoice Number:</strong> MANI001
+                  <strong>Invoice Number:</strong> {generateInvoiceNumber()}
                 </p>
                 <p>
                   <strong>Date:</strong> {new Date().toLocaleDateString()}
